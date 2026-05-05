@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Password Strength Analyzer — AI-Powered Security Check</title>
+<meta name="description" content="Free AI-powered password strength analyzer. Get instant feedback, crack time estimates, and AI suggestions for stronger passwords. No signup required.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Password Strength Analyzer",
+  "description": "Free AI-powered password strength analyzer with crack time estimates and improvement suggestions.",
+  "url": "https://oliverwqcwrw.github.io/password-strength-analyzer/",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Oliver W" }
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding:20px}
+.container{max-width:720px;margin:0 auto}
+h1{font-size:2rem;font-weight:700;color:#58a6ff;margin-bottom:8px;text-align:center}
+.subtitle{color:#8b949e;text-align:center;margin-bottom:32px;font-size:1rem}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;margin-bottom:20px}
+.card h2{font-size:1.1rem;color:#e6edf3;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+label{display:block;font-size:.85rem;color:#8b949e;margin-bottom:6px}
+input[type=text],input[type=password],textarea,select{width:100%;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;padding:10px 14px;font-size:.95rem;outline:none;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{border-color:#58a6ff}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:44px}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#8b949e;cursor:pointer;font-size:1.1rem}
+.strength-bar{height:6px;border-radius:3px;background:#21262d;margin:12px 0 4px;overflow:hidden;transition:all .3s}
+.strength-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.strength-label{font-size:.82rem;font-weight:600}
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:16px 0}
+.metric{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px;text-align:center}
+.metric .val{font-size:1.3rem;font-weight:700;color:#58a6ff}
+.metric .lbl{font-size:.75rem;color:#8b949e;margin-top:2px}
+.checklist{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.checklist li{font-size:.85rem;display:flex;align-items:center;gap:6px}
+.checklist li.pass{color:#3fb950}
+.checklist li.fail{color:#6e7681}
+.checklist li::before{content:"✓";width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0}
+.checklist li.pass::before{background:#238636;color:#3fb950}
+.checklist li.fail::before{content:"✗";background:#21262d;color:#6e7681}
+.provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.provider-btn{background:#21262d;border:2px solid #30363d;border-radius:8px;color:#c9d1d9;padding:10px;cursor:pointer;font-size:.85rem;transition:all .2s;text-align:center}
+.provider-btn:hover,.provider-btn.active{border-color:#58a6ff;background:#1c2128;color:#58a6ff}
+.api-key-section{margin-top:12px}
+button.primary{background:#238636;border:none;border-radius:8px;color:#fff;padding:12px 24px;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s;width:100%}
+button.primary:hover{background:#2ea043}
+button.primary:disabled{background:#21262d;color:#6e7681;cursor:not-allowed}
+.result-box{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:16px;min-height:100px;font-size:.9rem;line-height:1.7;white-space:pre-wrap;color:#c9d1d9}
+.result-box.loading::after{content:" ▋";animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.78rem;font-weight:600;margin-left:8px}
+.tag.very-weak{background:#3d1a1a;color:#f85149}
+.tag.weak{background:#3d2a0f;color:#e3b341}
+.tag.fair{background:#2d3417;color:#a3d977}
+.tag.strong{background:#0f2e1a;color:#3fb950}
+.tag.very-strong{background:#0a1e3a;color:#58a6ff}
+.donate{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;text-align:center}
+.donate h3{color:#e6edf3;margin-bottom:8px;font-size:1.1rem}
+.donate p{color:#8b949e;font-size:.85rem;margin-bottom:20px}
+.qr-grid{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.qr-item{text-align:center}
+.qr-item img{border-radius:8px;border:3px solid #21262d}
+.qr-label{font-size:.8rem;color:#8b949e;margin-top:8px}
+.qr-addr{font-size:.7rem;color:#58a6ff;word-break:break-all;max-width:140px;margin:4px auto 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔐 Password Strength Analyzer</h1>
+  <p class="subtitle">Instant analysis + AI-powered improvement suggestions. No data stored.</p>
+
+  <div class="card">
+    <h2>🔑 Enter Password</h2>
+    <div class="pw-wrap">
+      <input type="password" id="pwInput" placeholder="Type or paste your password..." oninput="analyzePassword()">
+      <button class="toggle-pw" onclick="togglePw()" title="Show/Hide">👁</button>
+    </div>
+    <div class="strength-bar"><div class="strength-fill" id="strengthFill" style="width:0%"></div></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span class="strength-label" id="strengthLabel" style="color:#6e7681">Enter a password above</span>
+      <span class="tag" id="strengthTag"></span>
+    </div>
+    <div class="metrics" id="metrics">
+      <div class="metric"><div class="val" id="lenVal">—</div><div class="lbl">Length</div></div>
+      <div class="metric"><div class="val" id="entropyVal">—</div><div class="lbl">Entropy (bits)</div></div>
+      <div class="metric"><div class="val" id="crackVal">—</div><div class="lbl">Crack Time</div></div>
+      <div class="metric"><div class="val" id="scoreVal">—</div><div class="lbl">Score /5</div></div>
+    </div>
+    <ul class="checklist" id="checklist">
+      <li id="ck-len" class="fail">At least 12 characters</li>
+      <li id="ck-upper" class="fail">Uppercase letters</li>
+      <li id="ck-lower" class="fail">Lowercase letters</li>
+      <li id="ck-num" class="fail">Numbers</li>
+      <li id="ck-sym" class="fail">Special symbols</li>
+      <li id="ck-nodict" class="fail">Not a dictionary word</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>🤖 AI Improvement Suggestions</h2>
+    <p style="font-size:.85rem;color:#8b949e;margin-bottom:16px">Get personalized tips to make your password stronger without forgetting it.</p>
+    
+    <div class="provider-grid">
+      <button class="provider-btn active" onclick="selectProvider('groq')" id="btn-groq">⚡ Groq (Free)</button>
+      <button class="provider-btn" onclick="selectProvider('openrouter')" id="btn-openrouter">🔀 OpenRouter (Free)</button>
+      <button class="provider-btn" onclick="selectProvider('deepseek')" id="btn-deepseek">🌊 DeepSeek</button>
+      <button class="provider-btn" onclick="selectProvider('openai')" id="btn-openai">✨ OpenAI</button>
+    </div>
+
+    <div class="api-key-section">
+      <label id="keyLabel">Groq API Key</label>
+      <input type="password" id="apiKey" placeholder="Enter your API key (saved locally)..." oninput="saveKey()">
+      <p style="font-size:.75rem;color:#8b949e;margin-top:6px">Key saved in your browser. Never sent to our servers.</p>
+    </div>
+
+    <br>
+    <button class="primary" id="analyzeBtn" onclick="getAISuggestions()" disabled>🔍 Get AI Suggestions</button>
+    <br><br>
+    <div class="result-box" id="resultBox" style="display:none"></div>
+  </div>
+
+  <div class="donate">
+    <h3>☕ Support Free Tools</h3>
+    <p>If this tool saved you time, consider a small donation to keep it free.</p>
+    <div class="qr-grid">
+      <div class="qr-item">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=TSvC67jexputnNHayVR8fpScwFmwvZV8jp" alt="USDT QR" width="110" height="110">
+        <div class="qr-label">USDT (TRC-20)</div>
+        <div class="qr-addr">TSvC67jexputnNHayVR8fpScwFmwvZV8jp</div>
+      </div>
+      <div class="qr-item">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=0x11e764fac3fcd4be16da43a252a62b156e06a632" alt="ETH QR" width="110" height="110">
+        <div class="qr-label">ETH (ERC-20)</div>
+        <div class="qr-addr">0x11e764fac3fcd4be16da43a252a62b156e06a632</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PROVIDERS = {
+  groq: { url: 'https://api.groq.com/openai/v1/chat/completions', model: 'llama-3.3-70b-versatile', label: 'Groq API Key' },
+  openrouter: { url: 'https://openrouter.ai/api/v1/chat/completions', model: 'meta-llama/llama-3.3-70b-instruct:free', label: 'OpenRouter API Key' },
+  deepseek: { url: 'https://api.deepseek.com/v1/chat/completions', model: 'deepseek-chat', label: 'DeepSeek API Key' },
+  openai: { url: 'https://api.openai.com/v1/chat/completions', model: 'gpt-4o-mini', label: 'OpenAI API Key' }
+};
+let currentProvider = 'groq';
+
+const commonPasswords = ['password','123456','qwerty','abc123','letmein','monkey','1234567890','iloveyou','admin','welcome','login','passw0rd','master','hello','dragon','batman','superman','football','baseball','soccer'];
+
+function selectProvider(p) {
+  currentProvider = p;
+  document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + p).classList.add('active');
+  document.getElementById('keyLabel').textContent = PROVIDERS[p].label;
+  const saved = localStorage.getItem('pw_key_' + p) || '';
+  document.getElementById('apiKey').value = saved;
+  updateAnalyzeBtn();
+}
+
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (k) localStorage.setItem('pw_key_' + currentProvider, k);
+  updateAnalyzeBtn();
+}
+
+function updateAnalyzeBtn() {
+  const k = document.getElementById('apiKey').value.trim() || localStorage.getItem('pw_key_' + currentProvider) || '';
+  const pw = document.getElementById('pwInput').value;
+  document.getElementById('analyzeBtn').disabled = !(k && pw);
+}
+
+function togglePw() {
+  const inp = document.getElementById('pwInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function calcEntropy(pw) {
+  let charset = 0;
+  if (/[a-z]/.test(pw)) charset += 26;
+  if (/[A-Z]/.test(pw)) charset += 26;
+  if (/[0-9]/.test(pw)) charset += 10;
+  if (/[^a-zA-Z0-9]/.test(pw)) charset += 32;
+  return Math.round(pw.length * Math.log2(charset || 1));
+}
+
+function crackTime(entropy) {
+  // 10 billion guesses/second (modern GPU)
+  const guesses = Math.pow(2, entropy);
+  const secs = guesses / 1e10;
+  if (secs < 1) return '< 1 sec';
+  if (secs < 60) return Math.round(secs) + ' secs';
+  if (secs < 3600) return Math.round(secs/60) + ' mins';
+  if (secs < 86400) return Math.round(secs/3600) + ' hours';
+  if (secs < 31536000) return Math.round(secs/86400) + ' days';
+  if (secs < 3153600000) return Math.round(secs/31536000) + ' years';
+  return (secs/31536000).toExponential(1) + ' yrs';
+}
+
+function analyzePassword() {
+  const pw = document.getElementById('pwInput').value;
+  updateAnalyzeBtn();
+  if (!pw) {
+    document.getElementById('strengthFill').style.width = '0%';
+    document.getElementById('strengthLabel').textContent = 'Enter a password above';
+    document.getElementById('strengthLabel').style.color = '#6e7681';
+    document.getElementById('strengthTag').textContent = '';
+    document.getElementById('lenVal').textContent = '—';
+    document.getElementById('entropyVal').textContent = '—';
+    document.getElementById('crackVal').textContent = '—';
+    document.getElementById('scoreVal').textContent = '—';
+    ['ck-len','ck-upper','ck-lower','ck-num','ck-sym','ck-nodict'].forEach(id => {
+      document.getElementById(id).className = 'fail';
+    });
+    return;
+  }
+
+  const checks = {
+    len: pw.length >= 12,
+    upper: /[A-Z]/.test(pw),
+    lower: /[a-z]/.test(pw),
+    num: /[0-9]/.test(pw),
+    sym: /[^a-zA-Z0-9]/.test(pw),
+    nodict: !commonPasswords.includes(pw.toLowerCase()) && pw.length > 3
+  };
+
+  const ids = { len:'ck-len', upper:'ck-upper', lower:'ck-lower', num:'ck-num', sym:'ck-sym', nodict:'ck-nodict' };
+  Object.entries(ids).forEach(([k,id]) => {
+    document.getElementById(id).className = checks[k] ? 'pass' : 'fail';
+  });
+
+  const score = Object.values(checks).filter(Boolean).length;
+  const entropy = calcEntropy(pw);
+
+  document.getElementById('lenVal').textContent = pw.length;
+  document.getElementById('entropyVal').textContent = entropy;
+  document.getElementById('crackVal').textContent = crackTime(entropy);
+  document.getElementById('scoreVal').textContent = score + '/6';
+
+  const levels = [
+    { min:0, max:1, label:'Very Weak', color:'#f85149', fill:'10%', tag:'very-weak' },
+    { min:2, max:2, label:'Weak', color:'#e3b341', fill:'30%', tag:'weak' },
+    { min:3, max:3, label:'Fair', color:'#a3d977', fill:'55%', tag:'fair' },
+    { min:4, max:4, label:'Strong', color:'#3fb950', fill:'75%', tag:'strong' },
+    { min:5, max:6, label:'Very Strong', color:'#58a6ff', fill:'100%', tag:'very-strong' }
+  ];
+  const lvl = levels.find(l => score >= l.min && score <= l.max) || levels[0];
+  document.getElementById('strengthFill').style.width = lvl.fill;
+  document.getElementById('strengthFill').style.background = lvl.color;
+  document.getElementById('strengthLabel').textContent = lvl.label;
+  document.getElementById('strengthLabel').style.color = lvl.color;
+  document.getElementById('strengthTag').textContent = lvl.label;
+  document.getElementById('strengthTag').className = 'tag ' + lvl.tag;
+}
+
+async function getAISuggestions() {
+  const pw = document.getElementById('pwInput').value;
+  if (!pw) return;
+  
+  const apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('pw_key_' + currentProvider) || '';
+  if (!apiKey) { alert('Please enter your API key'); return; }
+
+  const prov = PROVIDERS[currentProvider];
+  const entropy = calcEntropy(pw);
+  const score = [pw.length>=12, /[A-Z]/.test(pw), /[a-z]/.test(pw), /[0-9]/.test(pw), /[^a-zA-Z0-9]/.test(pw)].filter(Boolean).length;
+  
+  const prompt = `Analyze this password security profile (do NOT repeat the actual password in your response):
+- Length: ${pw.length} characters
+- Entropy: ${entropy} bits
+- Strength score: ${score}/5
+- Has uppercase: ${/[A-Z]/.test(pw)}
+- Has lowercase: ${/[a-z]/.test(pw)}
+- Has numbers: ${/[0-9]/.test(pw)}
+- Has symbols: ${/[^a-zA-Z0-9]/.test(pw)}
+
+Provide:
+1. A brief assessment (2-3 sentences)
+2. 3 specific actionable tips to make it stronger
+3. A safe example of a stronger pattern (don't use the user's actual password)
+4. A memorable technique (passphrase, substitution, etc.)
+
+Be concise and practical.`;
+
+  const btn = document.getElementById('analyzeBtn');
+  const box = document.getElementById('resultBox');
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyzing...';
+  box.style.display = 'block';
+  box.className = 'result-box loading';
+  box.textContent = 'Getting AI suggestions';
+
+  try {
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
+    if (currentProvider === 'openrouter') {
+      headers['HTTP-Referer'] = 'https://oliverwqcwrw.github.io/password-strength-analyzer/';
+      headers['X-Title'] = 'Password Strength Analyzer';
+    }
+    const resp = await fetch(prov.url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ model: prov.model, messages: [{ role: 'user', content: prompt }], max_tokens: 600, stream: true })
+    });
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error(err);
+    }
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let text = '';
+    box.className = 'result-box';
+    box.textContent = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      for (const line of chunk.split('\n')) {
+        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+          try {
+            const d = JSON.parse(line.slice(6));
+            const delta = d.choices?.[0]?.delta?.content || '';
+            text += delta;
+            box.textContent = text;
+          } catch {}
+        }
+      }
+    }
+  } catch(e) {
+    box.className = 'result-box';
+    box.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Get AI Suggestions';
+  }
+}
+
+// Load saved key on page load
+window.onload = () => {
+  const saved = localStorage.getItem('pw_key_groq') || '';
+  if (saved) document.getElementById('apiKey').value = saved;
+};
+</script>
+</body>
+</html>
